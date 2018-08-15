@@ -2,6 +2,7 @@ import { Component } from '@angular/core';
 import { IonicPage, NavController, NavParams, Platform } from 'ionic-angular';
 import { MediaCapture, MediaFile, CaptureError, CaptureImageOptions } from '@ionic-native/media-capture';
 import { File } from '@ionic-native/file';
+import { Camera, CameraOptions } from '@ionic-native/camera'
 
 
 import firebase from 'firebase';
@@ -24,6 +25,8 @@ var config = {
 })
 export class HomePage {
 
+  type
+  myPhoto
   imageURI;
   stringPic;
   stringVideo;
@@ -35,7 +38,7 @@ export class HomePage {
   }
   fire;
   firebaseUploads;
-  constructor(public navCtrl: NavController, public navParams: NavParams,private mediaCapture: MediaCapture, private platform : Platform, private f : File) {
+  constructor(public navCtrl: NavController, public navParams: NavParams,private mediaCapture: MediaCapture, private camera: Camera,private platform : Platform, private f : File) {
     
     firebase.initializeApp(config);
     this.upload = firebase.database().ref('/upload/');
@@ -46,12 +49,14 @@ export class HomePage {
     console.log('ionViewDidLoad HomePage');
   }
   uploads(type) {
+    this.type = type;
     console.log('upload clicked....')
     this.platform.ready().then(() => {
       let promise
       switch (type) {
         case 'camera':
           promise = this.mediaCapture.captureImage()
+          this.myPhoto = promise;
           break
         case 'video':
           promise = this.mediaCapture.captureVideo()
@@ -60,6 +65,7 @@ export class HomePage {
           promise = this.mediaCapture.captureAudio()
           break
       }
+      console.log("+++"+this.myPhoto)
       promise.then((mediaFile: MediaFile[]) => {
         console.log(mediaFile)
        // this.presentLoading();
@@ -71,20 +77,14 @@ export class HomePage {
           case 'camera':
             this.stringPic = this.imageURI;
             this.uploadFile.name ="Camera Image"
-            this.uploadFile.downloadUrl =  this.stringPic;
-            this.upload.push({name:"Camera Image",downloadUrl: this.stringPic});
             break
           case 'video':
           this.stringVideo = this.imageURI;
           this.uploadFile.name ="Video"
-          this.uploadFile.downloadUrl =   this.stringVideo ;
-          this.upload.push({name:"Video",downloadUrl: this.stringVideo});
             break
           case 'audio':
           this.stringAudio = this.imageURI;
           this.uploadFile.name ="Audio"
-          this.uploadFile.downloadUrl =  this.stringAudio;
-          this.upload.push({name:"Audio",downloadUrl: this.stringAudio});
             break
         }
         var directory: string = this.imageURI.substring(0, this.imageURI.lastIndexOf('/')+1);
@@ -110,36 +110,13 @@ export class HomePage {
             console.log(snapshot.Q)
              let  files = [];
             storageRef.getDownloadURL().then((url) => {
-              this.fire.downloadUrl = url;
-              this.firebaseUploads.push({downloadUrl: url});
-              return this.fire.downloadUrl;
+              console.log("%%%%%%%%%%%%"+url)
+              // this.fire.downloadUrl = url;
+              // console.log("My download url "+url)
+              this.firebaseUploads.push({name: type, downloadUrl: url});
+              //return this.fire.downloadUrl;
             });
             console.log(this.firebaseUploads);
-          
-                        // switch (type) {
-            //   case 'camera':
-            //   this.files.picture = storageRef.getDownloadURL().toString();
-            //   // this.uploadFile.name = "Camera Taken Picture";
-            //   // this.uploadFile.downloadUrl = storageRef.getDownloadURL().toString();
-            //   console.log( "url",storageRef.getDownloadURL().toString());
-            //   this.uploads.push(this.uploadFile);
-            //     break
-            //   case 'video':
-            //   // this.files.video = storageRef.getDownloadURL().toString();
-            //   // this.uploadFile.name = "Camera Taken Video";
-            //   this.uploadFile.downloadUrl = storageRef.getDownloadURL().toString();
-            //   this.uploads.push(this.uploadFile);
-            //   console.log( "url",storageRef.getDownloadURL().toString());
-            //     break
-            //   case 'audio':
-            //   // this.files.audio = storageRef.getDownloadURL().toString();
-            //   // this.uploadFile.name = "Audio Taken ";
-            //  // this.uploadFile.downloadUrl = storageRef.getDownloadURL().toString();
-            //   this.uploads.push(this.uploadFile);
-            //   console.log( "url",storageRef.getDownloadURL().toString());
-            //     break
-            // }
-             // this.presentMedia(type);
           })
           // return this.userService.saveProfilePicture(blob)
         }).catch(err => {
@@ -150,5 +127,8 @@ export class HomePage {
       })
     })
   }
+
+ 
+  
 }
 

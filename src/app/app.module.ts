@@ -5,6 +5,7 @@ import { SplashScreen } from '@ionic-native/splash-screen';
 import { StatusBar } from '@ionic-native/status-bar';
 import { MediaCapture, MediaFile, CaptureError, CaptureImageOptions } from '@ionic-native/media-capture';
 import { MyApp } from './app.component';
+import { Camera, CameraOptions } from '@ionic-native/camera'
 
 
 import { File } from '@ionic-native/file';
@@ -24,7 +25,7 @@ import { File } from '@ionic-native/file';
     StatusBar,
     SplashScreen,
     MediaCapture,
-    File,
+    File,Camera,
     {provide: ErrorHandler, useClass: IonicErrorHandler}
   ]
 })
